@@ -6,9 +6,11 @@ let objects = [];
 export function initObjectsView() {
   const form = document.querySelector("#objectForm");
   const resetButton = document.querySelector("#objectReset");
+  const tableBody = document.querySelector("#objectsTableBody");
 
   form.addEventListener("submit", handleSubmit);
   resetButton.addEventListener("click", resetForm);
+  tableBody.addEventListener("click", handleObjectTableClick);
   loadObjects();
 }
 
@@ -76,10 +78,16 @@ function renderObjects() {
       </td>
     </tr>
   `).join("");
+}
 
-  body.querySelectorAll("[data-edit-object]").forEach((button) => {
-    button.addEventListener("click", () => editObject(Number(button.dataset.editObject)));
-  });
+function handleObjectTableClick(event) {
+  const button = event.target.closest("[data-edit-object]");
+
+  if (!button) {
+    return;
+  }
+
+  editObject(Number(button.dataset.editObject));
 }
 
 function editObject(id) {
