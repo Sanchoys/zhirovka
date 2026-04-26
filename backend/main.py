@@ -1,17 +1,25 @@
+from contextlib import asynccontextmanager
 from typing import Annotated
 
 import psycopg
 from fastapi import Depends, FastAPI
 from fastapi.staticfiles import StaticFiles
 
-from database import get_connection
+from database import ensure_database_schema, get_connection
 from routers.dashboard import router as dashboard_router
 from routers.monthly_records import router as monthly_records_router
 from routers.objects import router as objects_router
 from routers.services import router as services_router
 from routers.tariffs import router as tariffs_router
 
-app = FastAPI(title="ZhirovKA API", version="0.1.0")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    ensure_database_schema()
+    yield
+
+
+app = FastAPI(title="ZhirovKA API", version="0.1.0", lifespan=lifespan)
 ConnectionDependency = Annotated[psycopg.Connection, Depends(get_connection)]
 
 app.include_router(dashboard_router, prefix="/api/dashboard", tags=["dashboard"])
