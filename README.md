@@ -29,6 +29,24 @@ Nginx is not used.
 
 Docker images for the backend are built automatically by GitHub Actions and published to GitHub Container Registry.
 
+## GitHub Actions Package Permissions
+
+The Docker publishing workflow uses the built-in `GITHUB_TOKEN` to push images to GHCR.
+
+Repository settings must allow this token to write packages:
+
+1. Open the repository on GitHub.
+2. Go to `Settings` -> `Actions` -> `General`.
+3. In `Workflow permissions`, select `Read and write permissions`.
+4. Save the setting.
+
+If the GHCR package already exists and was created outside this repository, also grant repository access to the package:
+
+1. Open `https://github.com/users/Sanchoys/packages/container/package/zhirovka`.
+2. Go to `Package settings`.
+3. In `Manage Actions access`, add the `Sanchoys/zhirovka` repository.
+4. Grant write access.
+
 ## Project Structure
 
 ```text

@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.1] - 2026-04-26
+
+### Changed
+
+- Updated Docker publishing workflow to derive the GHCR image name from the current GitHub repository in lowercase.
+- Added README instructions for configuring GitHub Actions package write permissions for GHCR publishing.
+
 ## [0.2.0] - 2026-04-26
 
 ### Added
