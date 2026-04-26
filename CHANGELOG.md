@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-04-26
+
+### Added
+
+- Added GitHub Actions workflow for building and publishing the backend Docker image to GitHub Container Registry.
+- Added GHCR image tagging for `latest`, semantic version tags, and short commit SHA tags.
+- Added README deployment instructions for pulling the pre-built image from GHCR.
+
+### Changed
+
+- Changed Docker Compose backend service to use `ghcr.io/sanchoys/zhirovka:latest` instead of building locally.
+- Updated README infrastructure documentation to describe automated image publishing via GitHub Actions.
+
 ## [0.1.0] - 2026-04-26
 
 ### Added

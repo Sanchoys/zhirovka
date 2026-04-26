@@ -17,9 +17,7 @@ services:
       retries: 5
 
   backend:
-    build:
-      context: .
-      dockerfile: backend/Dockerfile
+    image: ghcr.io/sanchoys/zhirovka:latest
     container_name: zhirovka-backend
     restart: unless-stopped
     environment:

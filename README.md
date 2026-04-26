@@ -11,14 +11,14 @@ The application tracks properties, utility services, historical tariffs, monthly
 - Charts: Chart.js via CDN
 - Backend: Python 3.12, FastAPI, Uvicorn
 - Database: PostgreSQL
-- Infrastructure: Docker Compose with alpine-based images
+- Infrastructure: Docker Compose with alpine-based images and GHCR image publishing
 
 ## Architecture
 
 The project currently runs two containers:
 
 - `db`: PostgreSQL using `postgres:16-alpine`
-- `backend`: FastAPI using `python:3.12-alpine`
+- `backend`: FastAPI image from `ghcr.io/sanchoys/zhirovka:latest`
 
 FastAPI serves both:
 
@@ -26,6 +26,8 @@ FastAPI serves both:
 - static frontend files from `/`
 
 Nginx is not used.
+
+Docker images for the backend are built automatically by GitHub Actions and published to GitHub Container Registry.
 
 ## Project Structure
 
@@ -70,21 +72,52 @@ APP_HOST_PORT=5000
 
 Use a real database password in `.env`. The `.env` file is ignored by git.
 
-## Run With Docker Compose
+## Deployment
 
-1. Build and start the application:
+The backend Docker image is built automatically by GitHub Actions on:
 
-```bash
-docker compose up --build
+- pushes to `main` or `master`
+- version tags matching `v*.*.*`
+
+The image is published to:
+
+```text
+ghcr.io/sanchoys/zhirovka
 ```
 
-2. Open the application:
+Image tags include:
+
+- `latest` for the default branch
+- the semantic version tag, for example `v0.2.0`
+- the short commit SHA
+
+## Run With Docker Compose
+
+1. Create a local `.env` file:
+
+```bash
+cp .env.example .env
+```
+
+2. Pull the pre-built backend image from GHCR:
+
+```bash
+docker compose pull
+```
+
+3. Start the application:
+
+```bash
+docker compose up
+```
+
+4. Open the application:
 
 ```text
 http://localhost:5000/
 ```
 
-3. Check backend health:
+5. Check backend health:
 
 ```text
 http://localhost:5000/api/health
@@ -95,7 +128,7 @@ http://localhost:5000/api/health
 Start in detached mode:
 
 ```bash
-docker compose up --build -d
+docker compose up -d
 ```
 
 Stop containers:
@@ -114,6 +147,12 @@ Validate Compose configuration:
 
 ```bash
 docker compose config
+```
+
+Pull the latest published image:
+
+```bash
+docker compose pull
 ```
 
 ## API Base Path
