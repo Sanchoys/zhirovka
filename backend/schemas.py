@@ -63,7 +63,7 @@ class ServiceRead(ServiceBase):
     updated_at: datetime
 
 
-CalcMethod = Literal["per_unit", "per_area", "per_person", "fixed"]
+CalcMethod = Literal["per_unit", "per_area", "per_person", "fixed", "manual"]
 
 
 class TariffBase(BaseModel):

@@ -3,6 +3,7 @@ export const calcMethodLabels = {
   per_area: "По площади",
   per_person: "По жильцам",
   fixed: "Фиксировано",
+  manual: "Вручную",
 };
 
 export function money(value) {

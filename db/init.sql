@@ -6,10 +6,12 @@ BEGIN;
 DO $$
 BEGIN
     IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'calc_method') THEN
-        CREATE TYPE calc_method AS ENUM ('per_unit', 'per_area', 'per_person', 'fixed');
+        CREATE TYPE calc_method AS ENUM ('per_unit', 'per_area', 'per_person', 'fixed', 'manual');
     END IF;
 END
 $$;
+
+ALTER TYPE calc_method ADD VALUE IF NOT EXISTS 'manual';
 
 CREATE TABLE IF NOT EXISTS objects (
     id BIGSERIAL PRIMARY KEY,

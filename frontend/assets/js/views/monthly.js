@@ -106,7 +106,7 @@ function renderCharges() {
         <div class="small text-secondary">${escapeHtml(calcMethodLabels[charge.calc_method])}</div>
       </td>
       <td>
-        <div>${money(charge.price)}</div>
+        <div>${charge.calc_method === "manual" ? "Ручной ввод" : money(charge.price)}</div>
         <div class="small text-secondary">с ${charge.valid_from}</div>
       </td>
       <td>
@@ -118,7 +118,7 @@ function renderCharges() {
           data-field="previous_reading"
           data-index="${index}"
           value="${charge.previous_reading}"
-          ${charge.has_meter ? "" : "disabled"}
+          ${charge.has_meter && charge.calc_method !== "manual" ? "" : "disabled"}
         >
       </td>
       <td>
@@ -130,14 +130,26 @@ function renderCharges() {
           data-field="current_reading"
           data-index="${index}"
           value="${charge.current_reading}"
-          ${charge.has_meter ? "" : "disabled"}
+          ${charge.has_meter && charge.calc_method !== "manual" ? "" : "disabled"}
         >
       </td>
       <td>
         <div class="fw-semibold" data-consumption="${index}">0</div>
         <div class="small text-secondary">${escapeHtml(charge.service_unit || "")}</div>
       </td>
-      <td class="fw-semibold" data-cost="${index}">0.00</td>
+      <td>
+        ${charge.calc_method === "manual" ? `
+          <input
+            class="form-control form-control-sm"
+            type="number"
+            min="0"
+            step="0.01"
+            data-field="final_cost"
+            data-index="${index}"
+            value="${charge.final_cost || ""}"
+          >
+        ` : `<span class="fw-semibold" data-cost="${index}">0.00</span>`}
+      </td>
     </tr>
   `).join("");
 
@@ -180,7 +192,9 @@ function recalculateRow(index) {
   const previous = Number(charge.previous_reading || 0);
   const current = Number(charge.current_reading || 0);
 
-  if (charge.has_meter && charge.current_reading !== "") {
+  if (charge.calc_method === "manual") {
+    charge.consumption = 0;
+  } else if (charge.has_meter && charge.current_reading !== "") {
     charge.consumption = Math.max(current - previous, 0);
   } else if (charge.calc_method === "per_area") {
     charge.consumption = Number(formData.area_m2);
@@ -193,10 +207,14 @@ function recalculateRow(index) {
   }
 
   charge.billable_quantity = getBillableQuantity(charge);
-  charge.final_cost = roundMoney(charge.billable_quantity * price);
+  if (charge.calc_method === "manual") {
+    charge.final_cost = roundMoney(Number(charge.final_cost || 0));
+  } else {
+    charge.final_cost = roundMoney(charge.billable_quantity * price);
+  }
 
   document.querySelector(`[data-consumption="${index}"]`).textContent = numberValue(charge.billable_quantity);
-  document.querySelector(`[data-cost="${index}"]`).textContent = money(charge.final_cost);
+  document.querySelector(`[data-cost="${index}"]`)?.replaceChildren(document.createTextNode(money(charge.final_cost)));
 }
 
 function getInitialBillableQuantity(charge) {
@@ -207,6 +225,9 @@ function getInitialBillableQuantity(charge) {
     return Number(formData?.residents_count || 0);
   }
   if (charge.calc_method === "fixed") {
+    return 1;
+  }
+  if (charge.calc_method === "manual") {
     return 1;
   }
   return 0;
@@ -220,6 +241,9 @@ function getBillableQuantity(charge) {
     return Number(formData.residents_count);
   }
   if (charge.calc_method === "fixed") {
+    return 1;
+  }
+  if (charge.calc_method === "manual") {
     return 1;
   }
   return Number(charge.consumption || 0);
@@ -258,11 +282,11 @@ async function saveMonthlyRecord(event) {
     charges: chargeRows.map((charge) => ({
       service_id: charge.service_id,
       tariff_id: charge.tariff_id,
-      previous_reading: charge.has_meter && charge.previous_reading !== "" ? charge.previous_reading : null,
-      current_reading: charge.has_meter && charge.current_reading !== "" ? charge.current_reading : null,
+      previous_reading: charge.has_meter && charge.calc_method !== "manual" && charge.previous_reading !== "" ? charge.previous_reading : null,
+      current_reading: charge.has_meter && charge.calc_method !== "manual" && charge.current_reading !== "" ? charge.current_reading : null,
       consumption: String(charge.consumption),
       billable_quantity: String(charge.billable_quantity),
-      applied_price: String(charge.price),
+      applied_price: String(charge.calc_method === "manual" ? charge.final_cost : charge.price),
       final_cost: String(charge.final_cost),
       notes: null,
     })),

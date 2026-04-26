@@ -4,6 +4,14 @@ ZhirovKA (`zhirovka`) is a utility bill and property expenses management system 
 
 The application tracks properties, utility services, historical tariffs, monthly meter readings, calculated charges, and dashboard analytics.
 
+Supported tariff calculation methods:
+
+- `per_unit`: by metered consumption
+- `per_area`: by property area
+- `per_person`: by resident count
+- `fixed`: fixed monthly amount
+- `manual`: monthly amount entered manually from an invoice
+
 ## Tech Stack
 
 - Frontend: HTML5, CSS3, Vanilla JavaScript with ES modules

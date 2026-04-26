@@ -247,6 +247,7 @@ const tariffsView = () => `
               <option value="per_area">По площади</option>
               <option value="per_person">По жильцам</option>
               <option value="fixed">Фиксировано</option>
+              <option value="manual">Вручную по счёту</option>
             </select>
           </div>
           <div class="alert d-none mt-3 mb-0" id="tariffAlert" role="alert"></div>
