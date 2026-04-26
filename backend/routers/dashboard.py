@@ -79,8 +79,8 @@ def get_dashboard_summary(
 def get_dashboard_trend(
     billing_year: int,
     billing_month: int,
+    connection: ConnectionDependency,
     months: int = 12,
-    connection: ConnectionDependency = Depends(get_connection),
 ):
     validate_period(billing_year, billing_month)
     if months < 1 or months > 24:
