@@ -210,6 +210,10 @@ const tariffsView = () => `
             <input class="form-check-input" id="serviceHasMeter" type="checkbox">
             <label class="form-check-label" for="serviceHasMeter">Счётчик</label>
           </div>
+          <div class="form-check form-switch mt-2">
+            <input class="form-check-input" id="serviceIncludeInTotal" type="checkbox" checked>
+            <label class="form-check-label" for="serviceIncludeInTotal">Учитывать в итогах</label>
+          </div>
           <div class="alert d-none mt-3 mb-0" id="serviceAlert" role="alert"></div>
         </div>
         <div class="card-footer bg-white">
@@ -369,12 +373,13 @@ const monthlyView = () => `
               <th>Предыдущие</th>
               <th>Текущие</th>
               <th>Кол-во</th>
+              <th>Итог</th>
               <th>Сумма</th>
             </tr>
           </thead>
           <tbody id="monthlyChargesBody">
             <tr>
-              <td colspan="6" class="text-secondary">Выберите объект и период</td>
+              <td colspan="7" class="text-secondary">Выберите объект и период</td>
             </tr>
           </tbody>
         </table>

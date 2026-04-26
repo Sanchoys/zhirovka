@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2026-04-26
+
+### Added
+
+- Added service-level inclusion control for monthly totals.
+- Added monthly charge inclusion flag so readings can be stored without affecting totals.
+- Added UI controls for excluding services or individual monthly charges from totals.
+
+### Changed
+
+- Updated monthly totals, monthly record totals, and dashboard analytics to include only charges marked for totals.
+- Updated README to document readings that are tracked but excluded from invoice totals.
+
 ## [0.4.0] - 2026-04-26
 
 ### Added

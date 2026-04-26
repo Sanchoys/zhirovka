@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS services (
     name VARCHAR(120) NOT NULL UNIQUE,
     unit VARCHAR(40),
     has_meter BOOLEAN NOT NULL DEFAULT FALSE,
+    include_in_total BOOLEAN NOT NULL DEFAULT TRUE,
     description TEXT,
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -69,6 +70,7 @@ CREATE TABLE IF NOT EXISTS readings_and_charges (
     billable_quantity NUMERIC(14, 4) NOT NULL DEFAULT 0 CHECK (billable_quantity >= 0),
     applied_price NUMERIC(12, 4) NOT NULL CHECK (applied_price >= 0),
     final_cost NUMERIC(14, 2) NOT NULL CHECK (final_cost >= 0),
+    include_in_total BOOLEAN NOT NULL DEFAULT TRUE,
     notes TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -79,6 +81,12 @@ CREATE TABLE IF NOT EXISTS readings_and_charges (
         OR current_reading >= previous_reading
     )
 );
+
+ALTER TABLE services
+ADD COLUMN IF NOT EXISTS include_in_total BOOLEAN NOT NULL DEFAULT TRUE;
+
+ALTER TABLE readings_and_charges
+ADD COLUMN IF NOT EXISTS include_in_total BOOLEAN NOT NULL DEFAULT TRUE;
 
 CREATE INDEX IF NOT EXISTS idx_objects_active ON objects(is_active);
 CREATE INDEX IF NOT EXISTS idx_services_active ON services(is_active);

@@ -39,6 +39,7 @@ class ServiceBase(BaseModel):
     name: str = Field(min_length=1, max_length=120)
     unit: str | None = Field(default=None, max_length=40)
     has_meter: bool = False
+    include_in_total: bool = True
     description: str | None = None
     is_active: bool = True
 
@@ -51,6 +52,7 @@ class ServiceUpdate(BaseModel):
     name: str | None = Field(default=None, min_length=1, max_length=120)
     unit: str | None = Field(default=None, max_length=40)
     has_meter: bool | None = None
+    include_in_total: bool | None = None
     description: str | None = None
     is_active: bool | None = None
 
@@ -99,6 +101,7 @@ class MonthlyChargeFormItem(BaseModel):
     service_name: str
     service_unit: str | None = None
     has_meter: bool
+    include_in_total: bool
     tariff_id: int
     price: Decimal
     calc_method: CalcMethod
@@ -130,6 +133,7 @@ class MonthlyChargeInput(BaseModel):
     billable_quantity: Decimal = Field(ge=0)
     applied_price: Decimal = Field(ge=0)
     final_cost: Decimal = Field(ge=0)
+    include_in_total: bool = True
     notes: str | None = None
 
 
@@ -167,6 +171,7 @@ class DashboardChargeRow(BaseModel):
     billable_quantity: Decimal
     applied_price: Decimal
     final_cost: Decimal
+    include_in_total: bool
 
 
 class DashboardBreakdownItem(BaseModel):

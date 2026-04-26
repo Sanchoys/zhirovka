@@ -14,7 +14,7 @@ ConnectionDependency = Annotated[psycopg.Connection, Depends(get_connection)]
 def list_services(connection: ConnectionDependency):
     rows = connection.execute(
         """
-        SELECT id, name, unit, has_meter, description, is_active, created_at, updated_at
+        SELECT id, name, unit, has_meter, include_in_total, description, is_active, created_at, updated_at
         FROM services
         ORDER BY name
         """
@@ -27,14 +27,15 @@ def create_service(payload: ServiceCreate, connection: ConnectionDependency):
     try:
         row = connection.execute(
             """
-            INSERT INTO services (name, unit, has_meter, description, is_active)
-            VALUES (%s, %s, %s, %s, %s)
-            RETURNING id, name, unit, has_meter, description, is_active, created_at, updated_at
+            INSERT INTO services (name, unit, has_meter, include_in_total, description, is_active)
+            VALUES (%s, %s, %s, %s, %s, %s)
+            RETURNING id, name, unit, has_meter, include_in_total, description, is_active, created_at, updated_at
             """,
             (
                 payload.name,
                 payload.unit,
                 payload.has_meter,
+                payload.include_in_total,
                 payload.description,
                 payload.is_active,
             ),
@@ -53,7 +54,7 @@ def create_service(payload: ServiceCreate, connection: ConnectionDependency):
 def get_service(service_id: int, connection: ConnectionDependency):
     row = connection.execute(
         """
-        SELECT id, name, unit, has_meter, description, is_active, created_at, updated_at
+        SELECT id, name, unit, has_meter, include_in_total, description, is_active, created_at, updated_at
         FROM services
         WHERE id = %s
         """,
@@ -77,15 +78,17 @@ def update_service(service_id: int, payload: ServiceUpdate, connection: Connecti
             SET name = %s,
                 unit = %s,
                 has_meter = %s,
+                include_in_total = %s,
                 description = %s,
                 is_active = %s
             WHERE id = %s
-            RETURNING id, name, unit, has_meter, description, is_active, created_at, updated_at
+            RETURNING id, name, unit, has_meter, include_in_total, description, is_active, created_at, updated_at
             """,
             (
                 merged["name"],
                 merged["unit"],
                 merged["has_meter"],
+                merged["include_in_total"],
                 merged["description"],
                 merged["is_active"],
                 service_id,

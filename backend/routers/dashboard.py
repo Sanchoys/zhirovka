@@ -20,10 +20,10 @@ def get_dashboard_summary(
 
     totals = connection.execute(
         """
-        SELECT COALESCE(SUM(rac.final_cost), 0) AS total_cost,
+        SELECT COALESCE(SUM(rac.final_cost) FILTER (WHERE rac.include_in_total = TRUE), 0) AS total_cost,
                COUNT(DISTINCT mr.id) AS records_count,
                COUNT(DISTINCT mr.object_id) AS objects_count,
-               COUNT(DISTINCT rac.service_id) AS services_count
+               COUNT(DISTINCT rac.service_id) FILTER (WHERE rac.include_in_total = TRUE) AS services_count
         FROM monthly_records mr
         LEFT JOIN readings_and_charges rac ON rac.monthly_record_id = mr.id
         WHERE mr.billing_year = %s AND mr.billing_month = %s
@@ -38,12 +38,14 @@ def get_dashboard_summary(
                rac.consumption,
                rac.billable_quantity,
                rac.applied_price,
-               rac.final_cost
+               rac.final_cost,
+               rac.include_in_total
         FROM monthly_records mr
         JOIN objects o ON o.id = mr.object_id
         JOIN readings_and_charges rac ON rac.monthly_record_id = mr.id
         JOIN services s ON s.id = rac.service_id
         WHERE mr.billing_year = %s AND mr.billing_month = %s
+          AND rac.include_in_total = TRUE
         ORDER BY o.name, s.name
         """,
         (billing_year, billing_month),
@@ -57,6 +59,7 @@ def get_dashboard_summary(
         JOIN readings_and_charges rac ON rac.monthly_record_id = mr.id
         JOIN services s ON s.id = rac.service_id
         WHERE mr.billing_year = %s AND mr.billing_month = %s
+          AND rac.include_in_total = TRUE
         GROUP BY s.name
         ORDER BY total_cost DESC, s.name
         """,
@@ -97,7 +100,7 @@ def get_dashboard_trend(
         )
         SELECT EXTRACT(YEAR FROM ms.month_start)::int AS billing_year,
                EXTRACT(MONTH FROM ms.month_start)::int AS billing_month,
-               COALESCE(SUM(rac.final_cost), 0) AS total_cost
+               COALESCE(SUM(rac.final_cost) FILTER (WHERE rac.include_in_total = TRUE), 0) AS total_cost
         FROM month_series ms
         LEFT JOIN monthly_records mr
           ON mr.billing_year = EXTRACT(YEAR FROM ms.month_start)::int

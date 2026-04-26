@@ -52,6 +52,7 @@ async function handleServiceSubmit(event) {
     name: document.querySelector("#serviceName").value.trim(),
     unit: document.querySelector("#serviceUnit").value.trim() || null,
     has_meter: document.querySelector("#serviceHasMeter").checked,
+    include_in_total: document.querySelector("#serviceIncludeInTotal").checked,
     description: null,
     is_active: true,
   };
@@ -62,6 +63,7 @@ async function handleServiceSubmit(event) {
       body: JSON.stringify(payload),
     });
     document.querySelector("#serviceForm").reset();
+    document.querySelector("#serviceIncludeInTotal").checked = true;
     showAlert("serviceAlert", "Услуга добавлена", "success");
     await loadAll();
   } catch (error) {

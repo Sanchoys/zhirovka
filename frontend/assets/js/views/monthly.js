@@ -61,6 +61,7 @@ async function loadFormData() {
     );
     chargeRows = formData.charges.map((charge) => ({
       ...charge,
+      include_in_total: charge.include_in_total,
       previous_reading: charge.previous_reading ?? "",
       current_reading: charge.current_reading ?? "",
       consumption: Number(charge.consumption || 0),
@@ -95,7 +96,7 @@ function renderCharges() {
   const body = document.querySelector("#monthlyChargesBody");
 
   if (!chargeRows.length) {
-    body.innerHTML = `<tr><td colspan="6" class="text-secondary">Нет активных услуг с тарифами для выбранного периода</td></tr>`;
+    body.innerHTML = `<tr><td colspan="7" class="text-secondary">Нет активных услуг с тарифами для выбранного периода</td></tr>`;
     return;
   }
 
@@ -138,6 +139,17 @@ function renderCharges() {
         <div class="small text-secondary">${escapeHtml(charge.service_unit || "")}</div>
       </td>
       <td>
+        <div class="form-check form-switch">
+          <input
+            class="form-check-input"
+            type="checkbox"
+            data-field="include_in_total"
+            data-index="${index}"
+            ${charge.include_in_total ? "checked" : ""}
+          >
+        </div>
+      </td>
+      <td>
         ${charge.calc_method === "manual" ? `
           <input
             class="form-control form-control-sm"
@@ -168,7 +180,7 @@ function setLoadingState(isLoading) {
     : `<i class="bi bi-arrow-clockwise"></i> Загрузить`;
 
   if (isLoading) {
-    body.innerHTML = `<tr><td colspan="6" class="text-secondary">Загрузка данных месяца...</td></tr>`;
+    body.innerHTML = `<tr><td colspan="7" class="text-secondary">Загрузка данных месяца...</td></tr>`;
   }
 }
 
@@ -176,7 +188,9 @@ function handleReadingInput(event) {
   const index = Number(event.target.dataset.index);
   const field = event.target.dataset.field;
 
-  chargeRows[index][field] = event.target.value;
+  chargeRows[index][field] = event.target.type === "checkbox"
+    ? event.target.checked
+    : event.target.value;
   recalculateRow(index);
   updateTotal();
 }
@@ -250,7 +264,9 @@ function getBillableQuantity(charge) {
 }
 
 function updateTotal() {
-  const total = chargeRows.reduce((sum, charge) => sum + Number(charge.final_cost || 0), 0);
+  const total = chargeRows
+    .filter((charge) => charge.include_in_total)
+    .reduce((sum, charge) => sum + Number(charge.final_cost || 0), 0);
   document.querySelector("#monthlyTotal").textContent = `${money(total)} BYN`;
 }
 
@@ -288,6 +304,7 @@ async function saveMonthlyRecord(event) {
       billable_quantity: String(charge.billable_quantity),
       applied_price: String(charge.calc_method === "manual" ? charge.final_cost : charge.price),
       final_cost: String(charge.final_cost),
+      include_in_total: charge.include_in_total,
       notes: null,
     })),
   };

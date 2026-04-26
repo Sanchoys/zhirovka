@@ -48,6 +48,7 @@ def get_monthly_form_data(
                s.name AS service_name,
                s.unit AS service_unit,
                s.has_meter,
+               s.include_in_total,
                t.id AS tariff_id,
                t.price,
                t.calc_method,
@@ -56,6 +57,7 @@ def get_monthly_form_data(
                current_charge.current_reading,
                COALESCE(current_charge.consumption, 0) AS consumption,
                COALESCE(current_charge.billable_quantity, 0) AS billable_quantity,
+               COALESCE(current_charge.include_in_total, s.include_in_total) AS include_in_total,
                COALESCE(current_charge.final_cost, 0) AS final_cost
         FROM services s
         JOIN LATERAL (
@@ -83,6 +85,7 @@ def get_monthly_form_data(
                    rac.current_reading,
                    rac.consumption,
                    rac.billable_quantity,
+                   rac.include_in_total,
                    rac.final_cost
             FROM monthly_records mr
             JOIN readings_and_charges rac ON rac.monthly_record_id = mr.id
@@ -153,9 +156,9 @@ def save_monthly_record(payload: MonthlyRecordSave, connection: ConnectionDepend
                 INSERT INTO readings_and_charges (
                     monthly_record_id, service_id, tariff_id, previous_reading,
                     current_reading, consumption, billable_quantity,
-                    applied_price, final_cost, notes
+                    applied_price, final_cost, include_in_total, notes
                 )
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 """,
                 (
                     monthly_record_id,
@@ -167,6 +170,7 @@ def save_monthly_record(payload: MonthlyRecordSave, connection: ConnectionDepend
                     charge.billable_quantity,
                     charge.applied_price,
                     charge.final_cost,
+                    charge.include_in_total,
                     charge.notes,
                 ),
             )
@@ -194,7 +198,7 @@ def get_monthly_record(monthly_record_id: int, connection: ConnectionDependency)
         """
         SELECT mr.id, mr.object_id, o.name AS object_name, mr.billing_year,
                mr.billing_month, mr.notes, mr.created_at, mr.updated_at,
-               COALESCE(SUM(rac.final_cost), 0) AS total_cost
+               COALESCE(SUM(rac.final_cost) FILTER (WHERE rac.include_in_total = TRUE), 0) AS total_cost
         FROM monthly_records mr
         JOIN objects o ON o.id = mr.object_id
         LEFT JOIN readings_and_charges rac ON rac.monthly_record_id = mr.id
@@ -211,7 +215,7 @@ def get_monthly_record(monthly_record_id: int, connection: ConnectionDependency)
         SELECT rac.id, rac.service_id, s.name AS service_name, rac.tariff_id,
                rac.previous_reading, rac.current_reading, rac.consumption,
                rac.billable_quantity, rac.applied_price, rac.final_cost,
-               rac.notes, t.calc_method
+               rac.include_in_total, rac.notes, t.calc_method
         FROM readings_and_charges rac
         JOIN services s ON s.id = rac.service_id
         JOIN tariffs t ON t.id = rac.tariff_id

@@ -12,6 +12,8 @@ Supported tariff calculation methods:
 - `fixed`: fixed monthly amount
 - `manual`: monthly amount entered manually from an invoice
 
+Services can be marked as included or excluded from monthly totals. This allows storing meter readings, such as hot and cold water, without double-counting them when they are already included in a separate manual invoice such as rent or a utility bill.
+
 ## Tech Stack
 
 - Frontend: HTML5, CSS3, Vanilla JavaScript with ES modules
