@@ -52,7 +52,11 @@ def get_monthly_form_data(
                t.price,
                t.calc_method,
                t.valid_from,
-               last_charge.current_reading AS previous_reading
+               COALESCE(current_charge.previous_reading, last_charge.current_reading) AS previous_reading,
+               current_charge.current_reading,
+               COALESCE(current_charge.consumption, 0) AS consumption,
+               COALESCE(current_charge.billable_quantity, 0) AS billable_quantity,
+               COALESCE(current_charge.final_cost, 0) AS final_cost
         FROM services s
         JOIN LATERAL (
             SELECT id, price, calc_method, valid_from
@@ -74,10 +78,33 @@ def get_monthly_form_data(
             ORDER BY mr.billing_year DESC, mr.billing_month DESC
             LIMIT 1
         ) last_charge ON TRUE
+        LEFT JOIN LATERAL (
+            SELECT rac.previous_reading,
+                   rac.current_reading,
+                   rac.consumption,
+                   rac.billable_quantity,
+                   rac.final_cost
+            FROM monthly_records mr
+            JOIN readings_and_charges rac ON rac.monthly_record_id = mr.id
+            WHERE mr.object_id = %s
+              AND mr.billing_year = %s
+              AND mr.billing_month = %s
+              AND rac.service_id = s.id
+            LIMIT 1
+        ) current_charge ON TRUE
         WHERE s.is_active = TRUE
         ORDER BY s.name
         """,
-        (billing_date, object_id, billing_year, billing_year, billing_month),
+        (
+            billing_date,
+            object_id,
+            billing_year,
+            billing_year,
+            billing_month,
+            object_id,
+            billing_year,
+            billing_month,
+        ),
     ).fetchall()
 
     return {

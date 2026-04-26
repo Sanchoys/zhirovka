@@ -49,8 +49,11 @@ async function loadFormData() {
   const year = Number(document.querySelector("#billingYear").value);
 
   if (!objectId || !month || !year) {
+    showAlert("Выберите объект, месяц и год", "warning");
     return;
   }
+
+  setLoadingState(true);
 
   try {
     formData = await apiRequest(
@@ -59,17 +62,23 @@ async function loadFormData() {
     chargeRows = formData.charges.map((charge) => ({
       ...charge,
       previous_reading: charge.previous_reading ?? "",
-      current_reading: "",
-      consumption: 0,
-      billable_quantity: getInitialBillableQuantity(charge),
-      final_cost: 0,
+      current_reading: charge.current_reading ?? "",
+      consumption: Number(charge.consumption || 0),
+      billable_quantity: Number(charge.billable_quantity || getInitialBillableQuantity(charge)),
+      final_cost: Number(charge.final_cost || 0),
     }));
     renderMonthlyMeta();
     renderCharges();
     recalculateAll();
-    hideAlert();
+    if (chargeRows.length) {
+      hideAlert();
+    } else {
+      showAlert("Нет активных услуг с тарифами для выбранного периода. Добавьте услуги и тарифы в разделе «Тарифы».", "warning");
+    }
   } catch (error) {
     showAlert(error.message, "danger");
+  } finally {
+    setLoadingState(false);
   }
 }
 
@@ -135,6 +144,20 @@ function renderCharges() {
   body.querySelectorAll("[data-field]").forEach((input) => {
     input.addEventListener("input", handleReadingInput);
   });
+}
+
+function setLoadingState(isLoading) {
+  const button = document.querySelector("#loadMonthlyData");
+  const body = document.querySelector("#monthlyChargesBody");
+
+  button.disabled = isLoading;
+  button.innerHTML = isLoading
+    ? `<span class="spinner-border spinner-border-sm" aria-hidden="true"></span> Загрузка`
+    : `<i class="bi bi-arrow-clockwise"></i> Загрузить`;
+
+  if (isLoading) {
+    body.innerHTML = `<tr><td colspan="6" class="text-secondary">Загрузка данных месяца...</td></tr>`;
+  }
 }
 
 function handleReadingInput(event) {

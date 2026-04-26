@@ -104,6 +104,10 @@ class MonthlyChargeFormItem(BaseModel):
     calc_method: CalcMethod
     valid_from: date
     previous_reading: Decimal | None = None
+    current_reading: Decimal | None = None
+    consumption: Decimal = Field(default=0, ge=0)
+    billable_quantity: Decimal = Field(default=0, ge=0)
+    final_cost: Decimal = Field(default=0, ge=0)
 
 
 class MonthlyRecordFormData(BaseModel):
