@@ -20,6 +20,8 @@ The project currently runs two containers:
 - `db`: PostgreSQL using `postgres:16-alpine`
 - `backend`: FastAPI image from `ghcr.io/sanchoys/zhirovka:latest`
 
+Both containers define Docker healthchecks. The backend healthcheck calls `/api/health`, which verifies that FastAPI is running and PostgreSQL is reachable.
+
 FastAPI serves both:
 
 - REST API under `/api/...`
