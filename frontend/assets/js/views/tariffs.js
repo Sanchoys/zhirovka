@@ -11,6 +11,8 @@ export function initTariffsView() {
   document.querySelector("#activeTariffDate").value = today;
   document.querySelector("#tariffValidFrom").value = today;
   document.querySelector("#serviceForm").addEventListener("submit", handleServiceSubmit);
+  document.querySelector("#serviceReset").addEventListener("click", resetServiceForm);
+  document.querySelector("#servicesTableBody").addEventListener("click", handleServicesTableClick);
   document.querySelector("#tariffForm").addEventListener("submit", handleTariffSubmit);
   document.querySelector("#tariffReset").addEventListener("click", resetTariffForm);
   document.querySelector("#activeTariffDate").addEventListener("change", loadActiveTariffs);
@@ -28,6 +30,7 @@ async function loadAll() {
     services = servicesData;
     tariffs = tariffsData;
     renderServiceOptions();
+    renderServices();
     renderTariffs();
     await loadActiveTariffs();
   } catch (error) {
@@ -48,6 +51,7 @@ async function loadActiveTariffs() {
 async function handleServiceSubmit(event) {
   event.preventDefault();
 
+  const id = document.querySelector("#serviceId").value;
   const payload = {
     name: document.querySelector("#serviceName").value.trim(),
     unit: document.querySelector("#serviceUnit").value.trim() || null,
@@ -58,17 +62,101 @@ async function handleServiceSubmit(event) {
   };
 
   try {
-    await apiRequest("/services", {
-      method: "POST",
+    await apiRequest(id ? `/services/${id}` : "/services", {
+      method: id ? "PUT" : "POST",
       body: JSON.stringify(payload),
     });
-    document.querySelector("#serviceForm").reset();
-    document.querySelector("#serviceIncludeInTotal").checked = true;
-    showAlert("serviceAlert", "Услуга добавлена", "success");
+    resetServiceForm();
+    showAlert("serviceAlert", "Услуга сохранена", "success");
     await loadAll();
   } catch (error) {
     showAlert("serviceAlert", error.message, "danger");
   }
+}
+
+function renderServices() {
+  const body = document.querySelector("#servicesTableBody");
+
+  if (!services.length) {
+    body.innerHTML = `<tr><td colspan="5" class="text-secondary">Услуги не добавлены</td></tr>`;
+    return;
+  }
+
+  body.innerHTML = services.map((service) => `
+    <tr>
+      <td>
+        <div class="fw-semibold">${escapeHtml(service.name)}</div>
+        <div class="small text-secondary">${service.is_active ? "Активна" : "Отключена"}</div>
+      </td>
+      <td>${escapeHtml(service.unit || "")}</td>
+      <td>${service.has_meter ? "Да" : "Нет"}</td>
+      <td>${service.include_in_total ? "Да" : "Нет"}</td>
+      <td class="text-end">
+        <button class="btn btn-outline-primary btn-sm" type="button" title="Редактировать" data-edit-service="${service.id}">
+          <i class="bi bi-pencil"></i>
+        </button>
+        <button class="btn btn-outline-danger btn-sm" type="button" title="Удалить" data-delete-service="${service.id}">
+          <i class="bi bi-trash"></i>
+        </button>
+      </td>
+    </tr>
+  `).join("");
+}
+
+function handleServicesTableClick(event) {
+  const editButton = event.target.closest("[data-edit-service]");
+  const deleteButton = event.target.closest("[data-delete-service]");
+
+  if (editButton) {
+    editService(Number(editButton.dataset.editService));
+    return;
+  }
+
+  if (deleteButton) {
+    deleteService(Number(deleteButton.dataset.deleteService));
+  }
+}
+
+function editService(id) {
+  const service = services.find((item) => item.id === id);
+
+  if (!service) {
+    return;
+  }
+
+  document.querySelector("#serviceFormTitle").textContent = "Редактирование услуги";
+  document.querySelector("#serviceId").value = service.id;
+  document.querySelector("#serviceName").value = service.name;
+  document.querySelector("#serviceUnit").value = service.unit || "";
+  document.querySelector("#serviceHasMeter").checked = service.has_meter;
+  document.querySelector("#serviceIncludeInTotal").checked = service.include_in_total;
+}
+
+async function deleteService(id) {
+  const service = services.find((item) => item.id === id);
+
+  if (!service || !window.confirm(`Удалить услугу «${service.name}»?`)) {
+    return;
+  }
+
+  try {
+    await apiRequest(`/services/${id}`, { method: "DELETE" });
+    if (document.querySelector("#serviceId").value === String(id)) {
+      resetServiceForm();
+    }
+    showAlert("serviceAlert", "Услуга удалена", "success");
+    await loadAll();
+  } catch (error) {
+    showAlert("serviceAlert", error.message, "danger");
+  }
+}
+
+function resetServiceForm() {
+  document.querySelector("#serviceFormTitle").textContent = "Новая услуга";
+  document.querySelector("#serviceForm").reset();
+  document.querySelector("#serviceId").value = "";
+  document.querySelector("#serviceIncludeInTotal").checked = true;
+  hideAlert("serviceAlert");
 }
 
 async function handleTariffSubmit(event) {

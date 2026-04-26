@@ -195,9 +195,10 @@ const tariffsView = () => `
     <div class="col-12 col-xl-4">
       <form class="card mb-3" id="serviceForm">
         <div class="card-header bg-white">
-          <h2 class="h6 mb-0">Новая услуга</h2>
+          <h2 class="h6 mb-0" id="serviceFormTitle">Новая услуга</h2>
         </div>
         <div class="card-body">
+          <input type="hidden" id="serviceId">
           <div class="mb-3">
             <label class="form-label" for="serviceName">Название</label>
             <input class="form-control" id="serviceName" maxlength="120" required>
@@ -216,11 +217,12 @@ const tariffsView = () => `
           </div>
           <div class="alert d-none mt-3 mb-0" id="serviceAlert" role="alert"></div>
         </div>
-        <div class="card-footer bg-white">
-          <button class="btn btn-outline-primary" type="submit">
-            <i class="bi bi-plus-lg"></i>
-            Добавить услугу
+        <div class="card-footer bg-white d-flex gap-2">
+          <button class="btn btn-outline-primary" id="serviceSubmit" type="submit">
+            <i class="bi bi-check-lg"></i>
+            Сохранить услугу
           </button>
+          <button class="btn btn-outline-secondary" id="serviceReset" type="button">Сбросить</button>
         </div>
       </form>
 
@@ -267,6 +269,26 @@ const tariffsView = () => `
     </div>
 
     <div class="col-12 col-xl-8">
+      <section class="card mb-3">
+        <div class="card-header bg-white">
+          <h2 class="h6 mb-0">Услуги</h2>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Название</th>
+                <th>Ед.</th>
+                <th>Счётчик</th>
+                <th>Итог</th>
+                <th class="text-end">Действия</th>
+              </tr>
+            </thead>
+            <tbody id="servicesTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
       <section class="card mb-3">
         <div class="card-header bg-white d-flex flex-wrap align-items-center justify-content-between gap-3">
           <h2 class="h6 mb-0">Активные тарифы</h2>

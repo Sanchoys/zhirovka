@@ -72,8 +72,11 @@ function renderObjects() {
         </span>
       </td>
       <td class="text-end">
-        <button class="btn btn-outline-primary btn-sm" type="button" data-edit-object="${item.id}">
+        <button class="btn btn-outline-primary btn-sm" type="button" title="Редактировать" data-edit-object="${item.id}">
           <i class="bi bi-pencil"></i>
+        </button>
+        <button class="btn btn-outline-danger btn-sm" type="button" title="Удалить" data-delete-object="${item.id}">
+          <i class="bi bi-trash"></i>
         </button>
       </td>
     </tr>
@@ -81,13 +84,17 @@ function renderObjects() {
 }
 
 function handleObjectTableClick(event) {
-  const button = event.target.closest("[data-edit-object]");
+  const editButton = event.target.closest("[data-edit-object]");
+  const deleteButton = event.target.closest("[data-delete-object]");
 
-  if (!button) {
+  if (editButton) {
+    editObject(Number(editButton.dataset.editObject));
     return;
   }
 
-  editObject(Number(button.dataset.editObject));
+  if (deleteButton) {
+    deleteObject(Number(deleteButton.dataset.deleteObject));
+  }
 }
 
 function editObject(id) {
@@ -115,6 +122,25 @@ function resetForm() {
   document.querySelector("#objectResidents").value = "0";
   document.querySelector("#objectActive").checked = true;
   hideAlert("objectAlert");
+}
+
+async function deleteObject(id) {
+  const item = objects.find((objectItem) => objectItem.id === id);
+
+  if (!item || !window.confirm(`Удалить объект «${item.name}»? Все месячные записи по нему тоже будут удалены.`)) {
+    return;
+  }
+
+  try {
+    await apiRequest(`/objects/${id}`, { method: "DELETE" });
+    if (document.querySelector("#objectId").value === String(id)) {
+      resetForm();
+    }
+    await loadObjects();
+    showAlert("objectAlert", "Объект удалён", "success");
+  } catch (error) {
+    showAlert("objectAlert", error.message, "danger");
+  }
 }
 
 function showAlert(id, message, variant) {
