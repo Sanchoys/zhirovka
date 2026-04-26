@@ -1,0 +1,63 @@
+# =========================
+# Python / FastAPI
+# =========================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual environments
+venv/
+env/
+.env_python/
+.venv/
+
+# Testing and coverage tools
+.pytest_cache/
+htmlcov/
+.coverage
+.tox/
+
+# =========================
+# Environment Variables
+# =========================
+# Never commit .env files with real secrets.
+.env
+.env.local
+.env.*.local
+
+# =========================
+# Docker
+# =========================
+pgdata/
+postgres_data/
+
+# =========================
+# Logs
+# =========================
+*.log
+logs/
+
+# =========================
+# IDEs and Editors
+# =========================
+.vscode/
+*.code-workspace
+.idea/
+*.iml
+
+# =========================
+# OS specific
+# =========================
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# =========================
+# Frontend / Vanilla JS
+# =========================
+node_modules/
