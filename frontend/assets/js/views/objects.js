@@ -103,7 +103,7 @@ function resetForm() {
   document.querySelector("#objectFormTitle").textContent = "Новый объект";
   document.querySelector("#objectForm").reset();
   document.querySelector("#objectId").value = "";
-  document.querySelector("#objectType").value = "apartment";
+  document.querySelector("#objectType").value = "Квартира";
   document.querySelector("#objectResidents").value = "0";
   document.querySelector("#objectActive").checked = true;
   hideAlert("objectAlert");

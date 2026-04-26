@@ -128,7 +128,12 @@ const objectsView = () => `
           </div>
           <div class="mb-3">
             <label class="form-label" for="objectType">Тип</label>
-            <input class="form-control" id="objectType" name="object_type" maxlength="60" value="apartment" required>
+            <select class="form-select" id="objectType" name="object_type" required>
+              <option value="Квартира">Квартира</option>
+              <option value="Загородный дом">Загородный дом</option>
+              <option value="Дача">Дача</option>
+              <option value="Гараж">Гараж</option>
+            </select>
           </div>
           <div class="mb-3">
             <label class="form-label" for="objectAddress">Адрес</label>
